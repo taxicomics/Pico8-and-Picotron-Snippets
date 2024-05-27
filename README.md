@@ -13,6 +13,7 @@ Feel free to abbreviate the function names etc. (Especially if you're coding in-
 
   ![lineofsight_2](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/aa5d805f-8d5f-4351-afc7-123281ceed01)
 - A function to **draw animated sprites** without the need for an external animation variable or timer. Useful for things like animated logos, animated foliage or water. Things that always do the same thing regardless of their surroundings.
+- 
   ![Animated_sprite](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/0e5009d4-022b-4532-a1d7-534c9df49c3a)
 - ChatGPT splurted out a **Terrain** function that I cleaned up a bit(lot). It smoothes random noise and generates nice terrains. I used it for my flooded caves clone, but maybe somebody else has a use for it, too. You can define it`s behavior in the last bit of the function, as an example I let it set pixel values on the sprite sheet. You could also set map tiles here. It is rather slow, but it can probably be enhanced by somebody smarter than me.
 
