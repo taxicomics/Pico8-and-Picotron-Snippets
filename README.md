@@ -19,3 +19,10 @@ Feel free to abbreviate the function names etc. (Especially if you're coding in-
 
   ![terrain](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/6cab32f0-d802-4898-af49-63094a14ddc8)
 
+
+- A minimal setup dialogue function for scrolling dialogues. Add new dialogue content with a single function and display text whenever there is text to display.
+  
+
+
+  ![untitled_1_1](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/85917249-22c1-466f-8472-33f75d3fc6a9)
+  ![untitled_1_0](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/b4ac1cd7-549d-458d-b427-3621d85577ac)
