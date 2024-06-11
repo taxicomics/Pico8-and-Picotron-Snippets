@@ -8,7 +8,8 @@ function get_path(start_node,end_node)
 	local max_iterations=1000
 	local current_iterations=0
 	--catch invalid paths early
-	if col(scaled_end_node.x,scaled_end_node.y)==false or col(scaled_start_node.x,scaled_start_node.y)==false then
+	if not col(scaled_end_node.x,scaled_end_node.y)
+		 or not col(scaled_start_node.x,scaled_start_node.y) then
 		return {}
 	end  
 	--GENERAL IDEA
@@ -19,10 +20,9 @@ function get_path(start_node,end_node)
 	
 	--necessary functions
 	local function is_table_empty(t)
-		for i, j in pairs(t) do
-			return false
-		end
-		return true
+		--I'll keep next as an alias to keep this readable,
+		--thx though @ablebody
+		next(t)
 	end
 	local function node_to_key(x,y)
 		return x..":"..y
@@ -32,11 +32,7 @@ function get_path(start_node,end_node)
 	end	
 	--function to check whether a table contains an element
 	local function table_has(table,element)
-		if table!=nil and table[node_to_key(element.x,element.y)]!=nil then
-		return true
-		else
-		return false
-		end
+		return table and table[node_to_key(element.x,element.y)]
 	end	
 	--function to get the h value(the heuristic distance) and skip the sqr for speed
 	local function get_h(node1,node2)
@@ -44,42 +40,33 @@ function get_path(start_node,end_node)
 	end
 	--get neighbors to check the sorrounding tiles
 	local function get_neighbors(node)
-	local ret={}
-		local function should_add(off_x,off_y,node)
-			local ret2={}
+		local ret = {}
+	    
+		local function handle_neighbor(off_x,off_y)
 			local pos_x=node.x+off_x
 			local pos_y=node.y+off_y
-			if col(pos_x,pos_y) and table_has(closed_list,{x=pos_x,y=pos_y})==false then
-					local new_node={
-					x=pos_x,
-					y=pos_y,
-					g=node.g+1,
-					parent=node,
-					}
-					new_node.h=get_h(new_node,scaled_end_node)
-					new_node.f=new_node.g+new_node.h
-					return new_node
-			else
-				return nil
+	       
+			if not col(pos_x,pos_y) or table_has(closed_list,{x=pos_x,y=pos_y}) then
+				return
 			end
-		end--end of local local function
-	above=	should_add(	0,		-1,	node)
-	below=	should_add(	0,		1,	node)
-	left=	should_add(	-1,		0,	node)
-	right=	should_add(	1,		0,	node)
-	if above!=nil then
-		add(ret,above)
-	end
-	if below!=nil then
-		add(ret,below)
-	end
-	if left!=nil then
-		add(ret,left)
-	end
-	if right!=nil then
-		add(ret,right)
-	end
-	return ret
+	        
+			local new_node={
+			x=pos_x,
+			y=pos_y,
+			g=node.g+1,
+			parent=node,
+			}
+			new_node.h=get_h(new_node,scaled_end_node)
+			new_node.f=new_node.g+new_node.h
+			add(ret,new_node)
+		end
+	   
+		handle_neighbor( 0,-1)
+		handle_neighbor( 0, 1)
+		handle_neighbor(-1, 0)
+		handle_neighbor( 1, 0)
+		   
+		return ret
 	end
 	--function to get lowest f node
 	local function get_lowest_f_node(tree)
@@ -131,7 +118,7 @@ function get_path(start_node,end_node)
 		for i in all(neighbors) do
 				--If it isnt on the open list, add it to the open list. Make the current square 
 				--the parent of this square. Record the F, G, and H costs of the square.
-				if table_has(open_list,i)==false then
+				if not table_has(open_list,i) then
 					open_list[node_to_key(i.x,i.y)]=i
 				else
 	--If it is on the open list already, check to see if this path to that
