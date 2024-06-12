@@ -4,7 +4,7 @@ function get_path(start_pos,end_pos)
 	end_pos={x=flr(end_pos.x/map_scale),y=flr(end_pos.y/map_scale)}
 	start_pos={x=flr(start_pos.x/map_scale),y=flr(start_pos.y/map_scale)}
 	
-	local path_found=false
+	local final_node=nil
 	--to prevent infinite loops in the case where it's impossible to find a path
 	local max_iterations=1000
 	
@@ -103,7 +103,7 @@ function get_path(start_pos,end_pos)
 			break
 		end
 		if current_node.x==end_pos.x and current_node.y==end_pos.y then
-			path_found=true
+			final_node=current_node
 			break
 		end
 		local current_node_key=node_to_key(current_node)
@@ -126,8 +126,8 @@ function get_path(start_pos,end_pos)
 		end
 	end
 	local ret={}
-	if path_found then
-		local current_node = closed_nodes[node_to_key(end_pos)]
+	if final_node then
+		local current_node = final_node
 		--we can construct a path by going from the end node to its parent,
 		--and to the parent of that node, and so on, until we reach the start node,
 		--which has no parent.
