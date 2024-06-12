@@ -1,8 +1,10 @@
-function get_path(start_pos,end_pos)	
+function get_path(original_end_pos, original_start_pos)	
 	--map_scale differs between picotron and pico8
 	local map_scale=16
-	end_pos={x=flr(end_pos.x/map_scale),y=flr(end_pos.y/map_scale)}
-	start_pos={x=flr(start_pos.x/map_scale),y=flr(start_pos.y/map_scale)}
+	--the start and end position get switched so that the returned path is in the
+	--right order without having to reverse it. 
+	local start_pos={x=flr(original_end_pos.x/map_scale),y=flr(original_end_pos.y/map_scale)}
+	local end_pos={x=flr(original_start_pos.x/map_scale),y=flr(original_start_pos.y/map_scale)}
 	
 	local final_node=nil
 	--to prevent infinite loops in the case where it's impossible to find a path
@@ -84,7 +86,7 @@ function get_path(start_pos,end_pos)
 	--START	
 	--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 	
-	--start_node will be the seed for the open list
+	--start_node will be the first entry for the open list
 	local start_node={
 	x=start_pos.x,
 	y=start_pos.y,
@@ -107,8 +109,8 @@ function get_path(start_pos,end_pos)
 			break
 		end
 		local current_node_key=node_to_key(current_node)
-		
-		--any node we visit is guaranteed to have the lowest f value it will ever have
+		--any node we visit is guaranteed to have the lowest f value it
+		--will ever have
 		--so we declare it closed, and never look at it again
 		closed_nodes[current_node_key]=current_node
 		open_nodes[current_node_key]=nil
