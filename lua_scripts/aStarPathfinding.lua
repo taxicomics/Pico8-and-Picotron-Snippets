@@ -1,66 +1,65 @@
-function get_path(start_node,end_node)	
-	--picotron/pico8 specific settings for this function
+function get_path(start_pos,end_pos)	
+	--map_scale differs between picotron and pico8
 	local map_scale=16
-	local scaled_end_node={x=flr(end_node.x/map_scale),y=flr(end_node.y/map_scale)}
-	local scaled_start_node={x=flr(start_node.x/map_scale),y=flr(start_node.y/map_scale)}
-	--function overflow vars
-	local path_found=false
+	end_pos={x=flr(end_pos.x/map_scale),y=flr(end_pos.y/map_scale)}
+	start_pos={x=flr(start_pos.x/map_scale),y=flr(start_pos.y/map_scale)}
+	
+	local final_node=nil
+	--to prevent infinite loops in the case where it's impossible to find a path
 	local max_iterations=1000
-	local current_iterations=0
-	--catch invalid paths early
-	if not col(scaled_end_node.x,scaled_end_node.y)
-		 or not col(scaled_start_node.x,scaled_start_node.y) then
+	
+	--can't make a path if the start or end node is in a wall
+	if not col(end_pos.x,end_pos.y)
+		or not col(start_pos.x,start_pos.y) then
 		return {}
-	end  
+	end
+	
 	--GENERAL IDEA
 	--each node gets three important values.
-	--g is the distance to the start in total steps to get there, so old_node_g+1
+	--g is the distance to the start in total steps to get there, so old_node.g+1
 	--h is the heuristic distance to the goal
 	--f is the total node cost consisting of g+h(=f)
 	
-	--necessary functions
-	local function is_table_empty(t)
-		--I'll keep next as an alias to keep this readable,
-		--thx though @ablebody
-		next(t)
-	end
-	local function node_to_key(x,y)
+	--declaring these here because they are used in the closures below
+	local open_nodes={}
+	local closed_nodes={}
+	
+	--hash coordinate lookup is cleaner than a 2d array
+	local function pos_to_key(x,y)
 		return x..":"..y
 	end
-	local function table_get(table,element)
-		return table[node_to_key(element.x,element.y)]
-	end	
-	--function to check whether a table contains an element
-	local function table_has(table,element)
-		return table and table[node_to_key(element.x,element.y)]
-	end	
-	--function to get the h value(the heuristic distance) and skip the sqr for speed
+	
+	local function node_to_key(node)
+		return pos_to_key(node.x,node.y)
+	end
+	
+	--manhattan distance is faster than euclidean distance as a heuristic
 	local function get_h(node1,node2)
 		return abs(node1.x-node2.x)+abs(node1.y-node2.y)
 	end
-	--get neighbors to check the sorrounding tiles
+	
 	local function get_neighbors(node)
 		local ret = {}
-	    
+		
 		local function handle_neighbor(off_x,off_y)
 			local pos_x=node.x+off_x
 			local pos_y=node.y+off_y
-	       
-			if not col(pos_x,pos_y) or table_has(closed_list,{x=pos_x,y=pos_y}) then
+			
+			if not col(pos_x,pos_y) or closed_nodes[pos_to_key(pos_x,pos_y)] then
 				return
 			end
-	        
+			
 			local new_node={
 			x=pos_x,
 			y=pos_y,
 			g=node.g+1,
 			parent=node,
 			}
-			new_node.h=get_h(new_node,scaled_end_node)
+			new_node.h=get_h(new_node,end_pos)
 			new_node.f=new_node.g+new_node.h
 			add(ret,new_node)
 		end
-	   
+		
 		handle_neighbor( 0,-1)
 		handle_neighbor( 0, 1)
 		handle_neighbor(-1, 0)
@@ -68,90 +67,75 @@ function get_path(start_node,end_node)
 		   
 		return ret
 	end
-	--function to get lowest f node
-	local function get_lowest_f_node(tree)
-	    local current_lowest_f_node = nil
-	    local f_best = -1
-	    for _, node in pairs(tree) do
-	        if node.f < f_best or f_best == -1 then
-	            current_lowest_f_node = node
-	            f_best = node.f
-	        end
-	    end
-	    return current_lowest_f_node
+	
+	local function get_lowest_f_node()
+		local current_lowest_f_node = nil
+		local f_best = -1
+		for _, node in pairs(open_nodes) do
+			if node.f < f_best or f_best == -1 then
+				current_lowest_f_node = node
+				f_best = node.f
+			end
+		end
+		return current_lowest_f_node
 	end
---list of nodes we have not fully explored/expanded. New ones get added to this
-	local open_list={}
-	--add the given start_node as the first node to the open list and give it g,h and f
-	local node={
-	x=scaled_start_node.x,
-	y=scaled_start_node.y,
-	parent={x=scaled_start_node.x,y=scaled_start_node.y},
+	
+	--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	--START	
+	--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	
+	--start_node will be the seed for the open list
+	local start_node={
+	x=start_pos.x,
+	y=start_pos.y,
 	g=0,
+	h=get_h(start_pos,end_pos),
 	}
-	node.h=get_h(node,scaled_end_node)
-	node.f=0
-	open_list[node_to_key(node.x,node.y)]=node
-	--list of already explored nodes. The ones with fully explored neighbors are here.
-	local closed_list={}
---XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
---START	
---XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
---as long as there are still nodes to explore and no path has been found
-	while not is_table_empty(open_list) do
-		current_iterations+=1
-		if current_iterations>max_iterations then
-			break
-		end
+	--g is 0, so f is just h
+	start_node.f=start_node.h
+	open_nodes[node_to_key(start_node)]=start_node
+	
+	for _=1,max_iterations do
 		--look for node with lowest f on open list
-		local current_node=get_lowest_f_node(open_list)
-		--if current_node is goal
-		if current_node.x==scaled_end_node.x and current_node.y==scaled_end_node.y then
-			path_found=true
+		local current_node=get_lowest_f_node()
+		--if there are no open nodes left, then there is no valid path
+		if not current_node then
 			break
 		end
-		--switch it to the closed list
-		closed_list[node_to_key(current_node.x,current_node.y)]=current_node
-		open_list[node_to_key(current_node.x,current_node.y)]=nil
-		--go through it's neighbors
-		local neighbors=get_neighbors(current_node)
-		for i in all(neighbors) do
-				--If it isnt on the open list, add it to the open list. Make the current square 
-				--the parent of this square. Record the F, G, and H costs of the square.
-				if not table_has(open_list,i) then
-					open_list[node_to_key(i.x,i.y)]=i
-				else
-	--If it is on the open list already, check to see if this path to that
-	-- square is better, using G cost as the measure. A lower G cost means that 
-	--this is a better path. If so, change the parent of the square to the current 
-	--square, and recalculate the G and F scores of the square. If you are keeping your
-	-- open list sorted by F score, you may need to resort the list to account for the
-	-- change.
-					local alt_node=table_get(open_list,i)
-					if alt_node.g>i.g then
-						open_list[node_to_key(alt_node.x,alt_node.y)]=nil
-						open_list[node_to_key(i.x,i.y)]=i
-					end
-				end
-		end--end of the neighbors loop
-	end--end of while #open_list>0 loop
+		if current_node.x==end_pos.x and current_node.y==end_pos.y then
+			final_node=current_node
+			break
+		end
+		local current_node_key=node_to_key(current_node)
+		
+		--any node we visit is guaranteed to have the lowest f value it will ever have
+		--so we declare it closed, and never look at it again
+		closed_nodes[current_node_key]=current_node
+		open_nodes[current_node_key]=nil
+		
+		for neighbor in all(get_neighbors(current_node)) do
+			local neighbor_key = node_to_key(neighbor)
+			local original_node = open_nodes[neighbor_key]
+			--If we discover a new neighbor that hasn't been seen before, we should add it
+			--to the open list.
+			--If the old node's g is higher, then the current path takes
+			--fewer steps to get to that node, and so should be replaced.
+			if not original_node or neighbor.g<original_node.g then
+				open_nodes[neighbor_key]=neighbor
+			end
+		end
+	end
 	local ret={}
-	if path_found then
---	if not is_table_empty(open_list) then
---if there are still elements in the open list a path was found
---now construct a path by going from one node to it's parent etc
-		local is_back=false
-		local current_node=get_lowest_f_node(open_list)
-	    while current_node do
-	        -- Add the current node to the path
-	        add(ret, {x = current_node.x, y = current_node.y})
-	        -- If the current node is the start node, break the loop
-	        if current_node.x == scaled_start_node.x and current_node.y == scaled_start_node.y then
-	            break
-	        end
-	        -- Move to the parent of the current node
-	        current_node = current_node.parent
-	    end	
-    end--if path was found
+	if final_node then
+		local current_node = final_node
+		--we can construct a path by going from the end node to its parent,
+		--and to the parent of that node, and so on, until we reach the start node,
+		--which has no parent.
+		while current_node do
+			add(ret, {x = current_node.x, y = current_node.y})
+			-- Move to the parent of the current node
+			current_node = current_node.parent
+		end
+	end
 	return ret
 end
