@@ -1,4 +1,4 @@
-function get_path(original_end_pos, original_start_pos)	
+function get_path(original_start_pos, original_end_pos)	
 	--map_scale differs between picotron and pico8
 	local map_scale=16
 	--the start and end position get switched so that the returned path is in the
