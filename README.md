@@ -27,5 +27,5 @@ Feel free to abbreviate the function names etc. (Especially if you're coding in-
   ![untitled_1_1](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/85917249-22c1-466f-8472-33f75d3fc6a9)
   ![untitled_1_0](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/b4ac1cd7-549d-458d-b427-3621d85577ac)
 
-- I finally wrote my own (slow and buggy) A* implementation. And after that was done I asked for feedback. @ablebody was very nice and helpful and explained all of his changes and improvements. Now it IS a quick pathfinding algorithm that you may use :) 
+- I finally wrote my own (slow and buggy) A* implementation. And after that was done I asked for feedback. @ablebody was very nice and helpful and explained all of his changes and improvements. Now it IS a quick pathfinding algorithm that you may use. 
   ![image](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/447e4e24-8077-4cf6-b9a6-7c37eab8439a)
