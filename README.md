@@ -32,3 +32,6 @@ Feel free to abbreviate the function names etc. (Especially if you're coding in-
 
 - I finally wrote my own (slow and buggy) A* implementation. And after that was done I asked for feedback. @ablebody was very nice and helpful and explained all of his changes and improvements. Now it IS a quick pathfinding algorithm that you may use. 
   ![image](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/447e4e24-8077-4cf6-b9a6-7c37eab8439a)
+
+- A function that takes a float amount of seconds as an argument and returns it neatly formatted as 00:00:00
+  ![Screenshot 2025-01-25 203500](https://github.com/user-attachments/assets/133b8977-ae8f-44c5-af74-dba4593cbbf7)
