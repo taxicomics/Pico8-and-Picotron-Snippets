@@ -18,10 +18,6 @@ Feel free to abbreviate the function names etc. (Especially if you're coding in-
   "frame 0" of your animation but is bound to `time()` So only use animations that loop easily.
 
   ![Animated_sprite](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/0e5009d4-022b-4532-a1d7-534c9df49c3a)
-- ChatGPT splurted out a **Terrain** function that I cleaned up a bit(lot). It smoothes random noise and generates nice terrains. I used it for my flooded caves clone, but maybe somebody else has a use for it, too. You can define it`s behavior in the last bit of the function, as an example I let it set pixel values on the sprite sheet. You could also set map tiles here. It is rather slow, but it can probably be enhanced by somebody smarter than me.
-
-  ![terrain](https://github.com/taxicomics/Pico8-and-Picotron-Snippets/assets/168220579/6cab32f0-d802-4898-af49-63094a14ddc8)
-
 
 - A minimal setup dialogue function for scrolling dialogues. Add new dialogue content with a single function and display text whenever there is text to display.
 
